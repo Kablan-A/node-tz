@@ -2,23 +2,22 @@ import "reflect-metadata";
 import bodyParser from "body-parser";
 import express from "express";
 import cors from "cors";
-// import passport from "passport";
 import cookieParser from "cookie-parser";
 
 import { connectDB } from "./config/db.config";
-import { FRONTEND_BASE_URL } from "./lib/constants/auth";
 import { configDotenv } from "dotenv";
+import { authRouter } from "./routes/auth.route";
 
 configDotenv();
 
+const { PORT, FRONTEND_BASE_URL } = process.env;
+
 const app = express();
 
-app.set("port", process.env.PORT || 3001);
-
+app.set("port", PORT || 3001);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-// app.use(passport.initialize());
 
 app.use(
 	cors({
@@ -31,7 +30,7 @@ app.get("/", (_req, res) => {
 	res.send("API Running");
 });
 
-// app.use("/auth", auth);
+app.use("/auth", authRouter);
 // app.use("/users", user);
 
 connectDB();
