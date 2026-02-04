@@ -8,6 +8,7 @@ import { connectDB } from "./config/db.config";
 import { configDotenv } from "dotenv";
 import { authRouter } from "./routes/auth.route";
 import { handleErrors } from "./middleware/handle-errors.middleware";
+import { userRouter } from "./routes/user.route";
 
 configDotenv();
 
@@ -32,7 +33,7 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/auth", authRouter);
-// app.use("/users", user);
+app.use("/users", userRouter);
 
 app.use(handleErrors);
 
