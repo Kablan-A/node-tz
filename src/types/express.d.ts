@@ -1,10 +1,9 @@
-import { Role } from "../entity/Role.entity";
-import { TokenPayload } from "./jwt";
+import { TokenPayload } from './jwt';
 
 declare global {
-	namespace Express {
-		interface Request {
-			user: TokenPayload;
-		}
-	}
+  namespace Express {
+    interface Request {
+      user: TokenPayload;
+    }
+  }
 }

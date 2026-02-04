@@ -1,16 +1,18 @@
-import { UUID } from "crypto";
-import { Role } from "../entity/Role.entity";
-import { Exclude } from "class-transformer";
+import { UUID } from 'crypto';
+
+import { Exclude } from 'class-transformer';
+
+import { Role } from '../entity/Role.entity';
 
 export class UserResponseDto {
-	id!: UUID;
-	fullName!: string;
-	email!: string;
-	dateOfBirth!: Date;
-	role!: Role;
+  id!: UUID;
+  fullName!: string;
+  email!: string;
+  dateOfBirth!: Date;
+  role!: Role;
 
-	@Exclude()
-	password?: never;
+  @Exclude()
+  password?: never;
 
-	isActive!: boolean;
+  isActive!: boolean;
 }

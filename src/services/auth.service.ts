@@ -1,42 +1,40 @@
-import * as bcrypt from "bcrypt";
-import HttpStatusCodes from "http-status-codes";
-import { AppError } from "../errors/AppError.error";
-import { plainToInstance } from "class-transformer";
-import {
-	AuthLoginRequestDto,
-	AuthRegisterRequestDto,
-	AuthResponseDto,
-} from "../dto/auth.dto";
-import { UserService } from "./user.service";
-import { generateTokens } from "../utils/generate-tokens.util";
-import { UserResponseDto } from "../dto/user.dto";
-import { User } from "../entity/User.entity";
+import * as bcrypt from 'bcrypt';
+import { plainToInstance } from 'class-transformer';
+import HttpStatusCodes from 'http-status-codes';
+
+import { AuthLoginRequestDto, AuthRegisterRequestDto, AuthResponseDto } from '../dto/auth.dto';
+import { UserResponseDto } from '../dto/user.dto';
+import { User } from '../entity/User.entity';
+import { AppError } from '../errors/AppError.error';
+import { generateTokens } from '../utils/generate-tokens.util';
+
+import { UserService } from './user.service';
 
 export class AuthService {
-	static async register(dto: AuthRegisterRequestDto) {
-		const newUser = await UserService.createUser(dto);
+  static async register(dto: AuthRegisterRequestDto) {
+    const newUser = await UserService.createUser(dto);
 
-		return this.buildAuthTokenResponse(newUser);
-	}
+    return this.buildAuthTokenResponse(newUser);
+  }
 
-	static async login({ email, password }: AuthLoginRequestDto) {
-		const user = await UserService.getUserByEmail(email);
+  static async login({ email, password }: AuthLoginRequestDto) {
+    const user = await UserService.getUserByEmail(email);
 
-		const isPasswordMatch = await bcrypt.compare(password, user.password);
-		if (!isPasswordMatch) {
-			throw new AppError("Invalid credentials", HttpStatusCodes.BAD_REQUEST);
-		}
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
+      throw new AppError('Invalid credentials', HttpStatusCodes.BAD_REQUEST);
+    }
 
-		return this.buildAuthTokenResponse(user);
-	}
+    return this.buildAuthTokenResponse(user);
+  }
 
-	private static buildAuthTokenResponse(user: User) {
-		const { accessToken, refreshToken } = generateTokens(user.id, user.role);
-		const payload = plainToInstance(AuthResponseDto, {
-			token: accessToken,
-			user: plainToInstance(UserResponseDto, user),
-		});
+  private static buildAuthTokenResponse(user: User) {
+    const { accessToken, refreshToken } = generateTokens(user.id, user.role);
+    const payload = plainToInstance(AuthResponseDto, {
+      token: accessToken,
+      user: plainToInstance(UserResponseDto, user),
+    });
 
-		return { payload, refreshToken };
-	}
+    return { payload, refreshToken };
+  }
 }
