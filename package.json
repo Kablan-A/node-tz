@@ -9,6 +9,7 @@
 		"migration:run": "npm run typeorm migration:run -- -d ./src/data-source.ts",
 		"migration:generate": "node ./scripts/generate-migration.js",
 		"migration:revert": "npm run typeorm migration:revert -- -d ./src/data-source.ts",
+		"seed:admin": "ts-node src/seeds/admin.seed.ts",
 		"test": "echo \"No tests specified\" && exit 0"
 	},
 	"dependencies": {
