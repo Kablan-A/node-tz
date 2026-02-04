@@ -9,6 +9,7 @@ import { hashPassword } from "../utils/hash-password.util";
 import * as bcrypt from "bcrypt";
 import { REFRESH_TOKEN_COOKIE_OPTIONS } from "../config/cookie.config";
 import { RoleType } from "../enums/RoleType.enum";
+import { AppError } from "../errors/AppError.error";
 
 export class AuthController {
 	static async register(req: Request, res: Response) {
@@ -21,50 +22,38 @@ export class AuthController {
 		});
 
 		if (user) {
-			return res
-				.status(HttpStatusCodes.CONFLICT)
-				.json({ message: "User already exists" });
+			throw new AppError("User already exists", HttpStatusCodes.CONFLICT);
 		}
 
-		try {
-			const roleRepository = AppDataSource.getRepository("Role");
-			const userRole = await roleRepository.findOneBy({ name: RoleType.USER });
+		const roleRepository = AppDataSource.getRepository("Role");
+		const userRole = await roleRepository.findOneBy({ name: RoleType.USER });
 
-			if (!userRole) {
-				return res
-					.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-					.json({ message: "User role not found" });
-			}
-
-			const hashedPassword = await hashPassword(password);
-			const newUser = userRepository.create({
-				fullName,
-				email,
-				dateOfBirth: new Date(dateOfBirth),
-				password: hashedPassword,
-				role: userRole,
-			});
-
-			await userRepository.save(newUser);
-
-			const { accessToken, refreshToken } = generateTokens(newUser.id);
-
-			const payload = plainToInstance(AuthTokenResponseDto, {
-				token: accessToken,
-				user: plainToInstance(UserResponseDto, newUser),
-			});
-
-			return res
-				.status(HttpStatusCodes.CREATED)
-				.cookie("refreshToken", refreshToken, REFRESH_TOKEN_COOKIE_OPTIONS)
-				.json({ message: "User registered successfully", data: payload });
-		} catch (error) {
-			console.error("Error registering user:", error);
-
-			return res
-				.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-				.json({ message: "Internal server error" });
+		if (!userRole) {
+			throw new AppError("User role not found", HttpStatusCodes.NOT_FOUND);
 		}
+
+		const hashedPassword = await hashPassword(password);
+		const newUser = userRepository.create({
+			fullName,
+			email,
+			dateOfBirth: new Date(dateOfBirth),
+			password: hashedPassword,
+			role: userRole,
+		});
+
+		await userRepository.save(newUser);
+
+		const { accessToken, refreshToken } = generateTokens(newUser.id);
+
+		const payload = plainToInstance(AuthTokenResponseDto, {
+			token: accessToken,
+			user: plainToInstance(UserResponseDto, newUser),
+		});
+
+		res
+			.status(HttpStatusCodes.CREATED)
+			.cookie("refreshToken", refreshToken, REFRESH_TOKEN_COOKIE_OPTIONS)
+			.json({ message: "User registered successfully", data: payload });
 	}
 
 	static async login(req: Request, res: Response) {
@@ -72,20 +61,19 @@ export class AuthController {
 
 		const userRepository = AppDataSource.getRepository("User");
 
-		const user = await userRepository.findOneBy({ email });
+		const user = await userRepository.findOne({
+			where: { email },
+			relations: ["role"],
+		});
 
 		if (!user) {
-			return res
-				.status(HttpStatusCodes.BAD_REQUEST)
-				.json({ message: "Invalid credentials" });
+			throw new AppError("Invalid credentials", HttpStatusCodes.BAD_REQUEST);
 		}
 
 		const isPasswordMatch = await bcrypt.compare(password, user.password);
 
 		if (!isPasswordMatch) {
-			return res
-				.status(HttpStatusCodes.BAD_REQUEST)
-				.json({ message: "Invalid credentials" });
+			throw new AppError("Invalid credentials", HttpStatusCodes.BAD_REQUEST);
 		}
 
 		const { accessToken, refreshToken } = generateTokens(user.id);
@@ -95,9 +83,9 @@ export class AuthController {
 			user: plainToInstance(UserResponseDto, user),
 		});
 
-		return res
+		res
 			.status(HttpStatusCodes.OK)
 			.cookie("refreshToken", refreshToken, REFRESH_TOKEN_COOKIE_OPTIONS)
-			.json({ message: "User logged in successfully", data: { payload } });
+			.json({ message: "User logged in successfully", data: payload });
 	}
 }

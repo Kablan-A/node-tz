@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import { connectDB } from "./config/db.config";
 import { configDotenv } from "dotenv";
 import { authRouter } from "./routes/auth.route";
+import { handleErrors } from "./middleware/handle-errors.middleware";
 
 configDotenv();
 
@@ -33,7 +34,13 @@ app.get("/", (_req, res) => {
 app.use("/auth", authRouter);
 // app.use("/users", user);
 
-connectDB();
+app.use(handleErrors);
 
-const port = app.get("port");
-app.listen(port, () => console.log(`Server started on port ${port}`));
+const initServer = async () => {
+	await connectDB();
+
+	const port = app.get("port");
+	app.listen(port, () => console.log(`Server started on port ${port}`));
+};
+
+initServer();
