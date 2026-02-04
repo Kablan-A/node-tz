@@ -31,7 +31,7 @@ export class AuthService {
 	}
 
 	private static buildAuthTokenResponse(user: User) {
-		const { accessToken, refreshToken } = generateTokens(user.id);
+		const { accessToken, refreshToken } = generateTokens(user.id, user.role);
 		const payload = plainToInstance(AuthResponseDto, {
 			token: accessToken,
 			user: plainToInstance(UserResponseDto, user),
