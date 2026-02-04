@@ -13,7 +13,7 @@ export class AuthRegisterRequestDto {
 	fullName!: string;
 
 	@IsNotEmpty()
-	@IsEmail()
+	@IsEmail({}, { message: "Invalid email format" })
 	email!: string;
 
 	@IsNotEmpty()
@@ -40,7 +40,7 @@ export class AuthRegisterRequestDto {
 
 export class AuthLoginRequestDto {
 	@IsNotEmpty()
-	@IsEmail()
+	@IsEmail({}, { message: "Invalid email format" })
 	email!: string;
 
 	@IsNotEmpty()
@@ -48,7 +48,7 @@ export class AuthLoginRequestDto {
 	password!: string;
 }
 
-export class AuthTokenResponseDto {
+export class AuthResponseDto {
 	token!: string;
 	user!: UserResponseDto;
 }

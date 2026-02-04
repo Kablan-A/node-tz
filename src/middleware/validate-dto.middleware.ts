@@ -17,7 +17,7 @@ export function validateDto<T extends object>(
 
 			if (errors.length > 0) {
 				const errorMessages = errors
-					.map((error) => Object.values(error.constraints || {}))
+					.map((err) => Object.values(err.constraints || {}))
 					.flat()
 					.join(", ");
 
@@ -26,8 +26,8 @@ export function validateDto<T extends object>(
 
 			req.body = dtoInstance;
 			next();
-		} catch (error) {
-			next(error);
+		} catch (err) {
+			next(err);
 		}
 	};
 }
