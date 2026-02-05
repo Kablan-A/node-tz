@@ -6,11 +6,14 @@ import { configDotenv } from 'dotenv';
 import express from 'express';
 
 import { connectDB } from './config/db.config';
+import { validateEnv } from './config/env.config';
 import { handleErrors } from './middleware/handle-errors.middleware';
 import { authRouter } from './routes/auth.route';
 import { userRouter } from './routes/user.route';
 
 configDotenv();
+
+validateEnv();
 
 const { PORT, FRONTEND_BASE_URL } = process.env;
 
