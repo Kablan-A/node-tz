@@ -1,9 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import HttpStatusCodes from 'http-status-codes';
-import jwt from 'jsonwebtoken';
 
 import { AppError } from '../errors/AppError.error';
-import { TokenPayload } from '../types/jwt';
+import { decodeToken } from '../utils/decode-token.util';
 
 const { ACCESS_SECRET } = process.env;
 
@@ -17,17 +16,8 @@ export function authentication(req: Request, res: Response, next: NextFunction) 
 
     const token = authHeader.split(' ')[1];
 
-    jwt.verify(token, ACCESS_SECRET!, (err, user) => {
-      if (err) {
-        if (err.name === 'TokenExpiredError') {
-          throw new AppError('Token has expired', HttpStatusCodes.UNAUTHORIZED);
-        }
-        throw new AppError('Token verification failed', HttpStatusCodes.UNAUTHORIZED);
-      }
-
-      req.user = user as TokenPayload;
-      next();
-    });
+    req.user = decodeToken(token, ACCESS_SECRET!);
+    next();
   } catch (err) {
     next(err);
   }

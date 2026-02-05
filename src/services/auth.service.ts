@@ -6,9 +6,12 @@ import { AuthLoginRequestDto, AuthRegisterRequestDto, AuthResponseDto } from '..
 import { UserResponseDto } from '../dto/user.dto';
 import { User } from '../entity/User.entity';
 import { AppError } from '../errors/AppError.error';
+import { decodeToken } from '../utils/decode-token.util';
 import { generateTokens } from '../utils/generate-tokens.util';
 
 import { UserService } from './user.service';
+
+const { REFRESH_SECRET } = process.env;
 
 export class AuthService {
   static async register(dto: AuthRegisterRequestDto) {
@@ -24,6 +27,14 @@ export class AuthService {
     if (!isPasswordMatch) {
       throw new AppError('Invalid credentials', HttpStatusCodes.BAD_REQUEST);
     }
+
+    return this.buildAuthTokenResponse(user);
+  }
+
+  static async refreshToken(refreshToken: string) {
+    const { userId } = decodeToken(refreshToken, REFRESH_SECRET!);
+
+    const user = await UserService.getUserById(userId);
 
     return this.buildAuthTokenResponse(user);
   }

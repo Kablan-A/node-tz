@@ -10,4 +10,6 @@ router.post('/register', validateDto(AuthRegisterRequestDto), AuthController.reg
 
 router.post('/login', validateDto(AuthLoginRequestDto), AuthController.login);
 
+router.post('/refresh-token', AuthController.refreshToken);
+
 export { router as authRouter };
