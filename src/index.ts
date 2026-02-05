@@ -1,9 +1,9 @@
+import 'reflect-metadata';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { configDotenv } from 'dotenv';
 import express from 'express';
-import 'reflect-metadata';
 
 import { connectDB } from './config/db.config';
 import { handleErrors } from './middleware/handle-errors.middleware';

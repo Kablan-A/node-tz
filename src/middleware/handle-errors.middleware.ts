@@ -1,9 +1,9 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import HttpStatusCodes from 'http-status-codes';
 
 import { AppError } from '../errors/AppError.error';
 
-export const handleErrors = (err: AppError, req: Request, res: Response) => {
+export const handleErrors = (err: AppError, req: Request, res: Response, next: NextFunction) => {
   const { statusCode, message } = err;
 
   if (err instanceof AppError) {

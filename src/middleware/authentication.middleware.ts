@@ -17,9 +17,17 @@ export function authentication(req: Request, res: Response, next: NextFunction) 
 
     const token = authHeader.split(' ')[1];
 
-    const decodedToken = jwt.verify(token, ACCESS_SECRET!) as TokenPayload;
-    req.user = decodedToken;
-    next();
+    jwt.verify(token, ACCESS_SECRET!, (err, user) => {
+      if (err) {
+        if (err.name === 'TokenExpiredError') {
+          throw new AppError('Token has expired', HttpStatusCodes.UNAUTHORIZED);
+        }
+        throw new AppError('Token verification failed', HttpStatusCodes.UNAUTHORIZED);
+      }
+
+      req.user = user as TokenPayload;
+      next();
+    });
   } catch (err) {
     next(err);
   }
