@@ -21,7 +21,7 @@ const app = express();
 
 app.set('port', PORT || 3001);
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use(
